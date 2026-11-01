@@ -14,7 +14,7 @@ import json
 from dataclasses import dataclass, field, replace
 from pathlib import Path
 
-from . import db
+from . import db, journal
 from .config import Settings
 from .normalize import (
     clean,
@@ -215,6 +215,9 @@ def run_etl(settings: Settings) -> EtlResult:
             result.duplicates += len(duplicates)
 
         result.dates = sorted(all_dates)
+        edited = journal.replay(conn)
+        if edited:
+            print(f"ETL: восстановлено ручных правок: {edited}")
         db.set_meta(conn, "etl_completed_at", dt.datetime.now().isoformat(timespec="seconds"))
         db.set_meta(conn, "avtor_out", str(settings.avtor_out))
         conn.commit()

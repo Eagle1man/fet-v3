@@ -91,6 +91,28 @@ def test_run_etl_is_idempotent(tmp_path: Path) -> None:
     conn.close()
 
 
+def test_manual_edit_survives_etl_rerun(tmp_path: Path) -> None:
+    from fetv3 import journal
+
+    settings = _settings(tmp_path)
+    _write_period(settings.avtor_out, "Rasp_1", [ROW])
+    run_etl(settings)
+
+    conn = db.connect(settings.db_path)
+    journal.init_journal(conn)
+    journal.apply_update(conn, period="Rasp_1", source_row=2, changes={"pair": 7}, actor="тест")
+    conn.close()
+
+    run_etl(settings)
+
+    conn = db.connect(settings.db_path)
+    row = conn.execute(
+        "SELECT pair FROM lessons WHERE period='Rasp_1' AND source_row=2"
+    ).fetchone()
+    assert row["pair"] == 7
+    conn.close()
+
+
 def test_read_csv_rows_detects_missing_column(tmp_path: Path) -> None:
     path = tmp_path / "bad.csv"
     path.write_bytes("Group;Les\nГ1;1\n".encode("cp1251"))

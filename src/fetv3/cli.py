@@ -198,6 +198,12 @@ def command_audit(settings: Settings) -> int:
     return 0
 
 
+def command_ui(settings: Settings) -> int:
+    from .ui.app import main as run_ui
+
+    return run_ui(settings)
+
+
 def command_all(settings: Settings) -> int:
     code = command_etl(settings)
     if code:
@@ -221,6 +227,7 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("validate", help="Проверить .fet схемой и fet-cl")
     sub.add_parser("report", help="Сформировать md/xlsx отчёты")
     sub.add_parser("audit", help="Сформировать docs/00_audit.md")
+    sub.add_parser("ui", help="Открыть панель Tkinter")
     sub.add_parser("all", help="etl + build + validate + report + audit")
 
     args = parser.parse_args(argv)
@@ -236,6 +243,8 @@ def main(argv: list[str] | None = None) -> int:
             return command_report(settings)
         if args.command == "audit":
             return command_audit(settings)
+        if args.command == "ui":
+            return command_ui(settings)
         if args.command == "all":
             return command_all(settings)
     except Exception as exc:  # noqa: BLE001 - CLI обязан показать причину
