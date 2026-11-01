@@ -192,3 +192,38 @@ def test_health(settings: Settings) -> None:
     response = client.get("/healthz")
     assert response.status_code == 200
     assert "lessons=1" in response.text
+
+
+def test_public_schedule_without_export(settings: Settings) -> None:
+    client = _client(settings)
+    redirect = client.get("/schedule", follow_redirects=False)
+    assert redirect.status_code == 307
+    assert redirect.headers["location"] == "/schedule/"
+    response = client.get("/schedule/")
+    assert response.status_code == 404
+    assert "не опубликовано" in response.text
+
+
+def test_public_schedule_serves_latest_export(settings: Settings) -> None:
+    from fetv3 import sitepub
+
+    sitepub.export_site(settings)
+    client = _client(settings)
+    index = client.get("/schedule/")
+    assert index.status_code == 200
+    assert "assets/viewer.js" in index.text
+
+    data = client.get("/schedule/data.json")
+    assert data.status_code == 200
+    assert '"schedules"' in data.text
+
+    asset = client.get("/schedule/assets/viewer.css")
+    assert asset.status_code == 200
+
+
+def test_public_schedule_blocks_traversal(settings: Settings) -> None:
+    from fetv3 import sitepub
+
+    sitepub.export_site(settings)
+    client = _client(settings)
+    assert client.get("/schedule/..%2f..%2fsecret").status_code == 404

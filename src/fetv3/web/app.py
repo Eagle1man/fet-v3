@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import datetime as dt
 import json
+import mimetypes
 import secrets
 import threading
 import uuid
@@ -549,6 +550,49 @@ def create_app(settings: Settings) -> FastAPI:
             media_type="application/zip",
             filename=f"site_{version}.zip",
         )
+
+    # ---------- публичная страница расписания ----------
+
+    def latest_export() -> Path | None:
+        version = sitepub.latest_version(settings)
+        if not version:
+            return None
+        try:
+            return sitepub.resolve_export(settings, version)
+        except (ValueError, FileNotFoundError):
+            return None
+
+    @app.get("/schedule", include_in_schema=False)
+    def schedule_redirect() -> Response:
+        return RedirectResponse("/schedule/", status_code=307)
+
+    @app.get("/schedule/", response_class=HTMLResponse, include_in_schema=False)
+    def schedule_index() -> Response:
+        export = latest_export()
+        if export is None:
+            return HTMLResponse(
+                "<!doctype html><meta charset='utf-8'>"
+                "<h1>Расписание не опубликовано</h1>"
+                "<p>Выполните экспорт в панели или командой <code>run.py export</code>.</p>",
+                status_code=404,
+            )
+        index = export / "index.html"
+        if not index.exists():
+            return PlainTextResponse("В выгрузке нет index.html", status_code=500)
+        return FileResponse(index, media_type="text/html", headers={"Cache-Control": "no-cache"})
+
+    @app.get("/schedule/{resource:path}", include_in_schema=False)
+    def schedule_resource(resource: str) -> Response:
+        export = latest_export()
+        if export is None:
+            return PlainTextResponse("Расписание не опубликовано", status_code=404)
+        root = export.resolve()
+        target = (root / resource).resolve()
+        if not target.is_relative_to(root) or not target.is_file():
+            return PlainTextResponse("Файл не найден", status_code=404)
+        media_type, _ = mimetypes.guess_type(target.name)
+        headers = {"Cache-Control": "no-cache" if resource.endswith(".json") else "public, max-age=600"}
+        return FileResponse(target, media_type=media_type or "application/octet-stream", headers=headers)
 
     return app
 

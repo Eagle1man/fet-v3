@@ -27,6 +27,8 @@ python -X utf8 run.py report    # out\final_report.md / .xlsx
 python -X utf8 run.py audit     # docs\00_audit.md
 python -X utf8 run.py ui        # панель: поиск, правка, откат
 python -X utf8 run.py web       # веб-панель для ВМ (FastAPI)
+#   панель:      http://<ВМ>:8000/
+#   расписание:  http://<ВМ>:8000/schedule/  (без входа, для сайта/iframe)
 python -X utf8 run.py export    # выгрузка на сайт вуза (JSON + архив)
 python -X utf8 run.py ask "Что у группы К1А1(9) 26.01.2026?"
 python -X utf8 run.py chat      # диалог: предложение правки и подтверждение
@@ -68,7 +70,7 @@ src/fetv3/
   journal.py     правки, версии, откат (одна транзакция)
   ui/app.py      панель Tkinter
   cli.py         команды
-tests/           89 тестов
+tests/           92 теста
 ```
 
 ## Правила сборки
@@ -129,6 +131,10 @@ tests/           89 тестов
 API панели повторяет контракт сайта: `/api/site/groups`,
 `/api/site/schedule?group=…`. Сопоставление групп и академий берётся из
 `config/site_groups.json`.
+
+Опубликованная версия доступна без входа по адресу `/schedule/` — её можно
+поставить ссылкой или iframe на сайт вуза. Примеры nginx и systemd — в
+`deploy/`.
 
 ## Ограничения (это не баги, а состояние данных)
 - Даты в выгрузке — **2026 год**, хотя каталоги названы `*.27`. Год не

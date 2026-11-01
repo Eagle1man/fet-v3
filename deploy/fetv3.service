@@ -1,0 +1,28 @@
+# systemd-юнит для панели FET v3 (Linux-ВМ).
+# Установка:
+#   sudo cp deploy/fetv3.service /etc/systemd/system/fetv3.service
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now fetv3
+# Пути и пользователя поправьте под свою ВМ.
+
+[Unit]
+Description=FET v3 schedule panel
+After=network.target
+
+[Service]
+Type=simple
+User=fetv3
+Group=fetv3
+WorkingDirectory=/opt/fetv3
+EnvironmentFile=/opt/fetv3/.env
+Environment=FETV3_ENV=/opt/fetv3/.env
+ExecStart=/opt/fetv3/.venv/bin/python -m uvicorn fetv3.web.main:app --host 127.0.0.1 --port 8000 --proxy-headers
+Restart=always
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/opt/fetv3/data /opt/fetv3/out
+
+[Install]
+WantedBy=multi-user.target

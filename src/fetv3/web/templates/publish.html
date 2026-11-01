@@ -6,6 +6,8 @@
   <p class="muted">
     Экспорт отдаёт JSON в формате действующего API
     <code>read-file-groups.php</code> и автономный просмотрщик.
+    Опубликованная версия всегда доступна по адресу
+    <a href="/schedule/" target="_blank" rel="noopener">/schedule/</a>.
   </p>
 </div>
 
@@ -64,7 +66,7 @@
   </div>
   {% if exports %}
   <table class="table table--compact">
-    <thead><tr><th>Версия</th><th>Когда</th><th>Период</th><th>Групп</th><th>Занятий</th><th>Архив</th><th>FTP</th></tr></thead>
+    <thead><tr><th>Версия</th><th>Когда</th><th>Период</th><th>Групп</th><th>Занятий</th><th>Архив</th><th>Просмотр</th><th>FTP</th></tr></thead>
     <tbody>
     {% for e in exports %}
       <tr>
@@ -74,6 +76,7 @@
         <td>{{ e.stats.groups }}</td>
         <td>{{ e.stats.lessons }}</td>
         <td><a href="/download/{{ e.version }}">скачать</a></td>
+        <td><a href="/schedule/" target="_blank" rel="noopener">открыть</a></td>
         <td>
           {% if ftp_configured and is_admin %}
           <form method="post" action="/publish/upload" class="inline">
