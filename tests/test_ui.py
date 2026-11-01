@@ -1,14 +1,15 @@
 from __future__ import annotations
 
-import tkinter as tk
 from collections.abc import Callable
 from pathlib import Path
 
 import pytest
 
-from fetv3 import db, journal
-from fetv3.config import DEFAULT_HOURS, Settings
-from fetv3.db import LessonRow
+tk = pytest.importorskip("tkinter")
+
+from fetv3 import db, journal  # noqa: E402
+from fetv3.config import DEFAULT_HOURS, Settings  # noqa: E402
+from fetv3.db import LessonRow  # noqa: E402
 
 
 def _settings(tmp_path: Path) -> Settings:
