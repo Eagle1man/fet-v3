@@ -1,0 +1,189 @@
+:root {
+  --blue: #0a4093;
+  --blue-dark: #072e6b;
+  --blue-soft: #eaf0fb;
+  --line: #d7e0ef;
+  --text: #1d2733;
+  --muted: #66748a;
+  --bg: #f4f7fc;
+  --white: #ffffff;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", "PT Sans", Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.wrap {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.top {
+  background: linear-gradient(120deg, var(--blue-dark), var(--blue));
+  color: var(--white);
+  padding: 22px 0;
+}
+
+.top .wrap {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.brand { display: flex; align-items: center; gap: 16px; }
+
+.brand__mark {
+  border: 2px solid rgba(255, 255, 255, 0.7);
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.brand__text h1 { margin: 0; font-size: 24px; font-weight: 600; }
+.brand__text p { margin: 4px 0 0; opacity: 0.85; font-size: 14px; }
+.updated { font-size: 13px; opacity: 0.85; }
+
+.controls {
+  display: flex;
+  gap: 14px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 16px;
+  margin: 22px 0 16px;
+  box-shadow: 0 2px 10px rgba(10, 64, 147, 0.05);
+}
+
+.controls label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.controls select {
+  min-width: 210px;
+  padding: 9px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--white);
+  color: var(--text);
+  font-size: 14px;
+}
+
+.controls button, .link {
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--blue);
+  background: var(--blue);
+  color: var(--white);
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.controls button:hover, .link:hover { background: var(--blue-dark); }
+.link { background: var(--white); color: var(--blue); }
+
+.table-wrap {
+  overflow: auto;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(10, 64, 147, 0.06);
+  max-height: 72vh;
+}
+
+.grid { border-collapse: separate; border-spacing: 0; width: 100%; min-width: 980px; }
+
+.grid th, .grid td {
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  padding: 8px;
+  vertical-align: top;
+  font-size: 13px;
+}
+
+.grid thead th {
+  position: sticky;
+  top: 0;
+  background: var(--blue);
+  color: var(--white);
+  font-weight: 600;
+  z-index: 2;
+  text-align: center;
+  min-width: 150px;
+}
+
+.grid thead th:first-child { left: 0; z-index: 3; min-width: 92px; }
+
+.grid tbody td:first-child {
+  position: sticky;
+  left: 0;
+  background: var(--blue-soft);
+  font-weight: 600;
+  color: var(--blue-dark);
+  z-index: 1;
+  white-space: nowrap;
+}
+
+.grid td.has-lesson { background: #fbfdff; }
+
+.lesson + .lesson { border-top: 1px dashed var(--line); margin-top: 6px; padding-top: 6px; }
+.lesson__subject { font-weight: 600; color: var(--blue-dark); }
+.lesson__meta { color: var(--muted); margin-top: 2px; }
+.lesson__room { color: var(--text); font-weight: 600; margin-top: 2px; }
+
+.badge {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: #ffe9c7;
+  color: #8a5200;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.empty {
+  padding: 40px;
+  text-align: center;
+  color: var(--muted);
+  background: var(--white);
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+}
+
+.hidden { display: none; }
+
+.hint { color: var(--muted); font-size: 13px; margin: 12px 0 40px; }
+
+.bottom {
+  border-top: 1px solid var(--line);
+  background: var(--white);
+  color: var(--muted);
+  padding: 14px 0;
+  font-size: 13px;
+}
+
+.bottom .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+
+@media print {
+  .controls, .bottom, .hint { display: none; }
+  .table-wrap { max-height: none; border: none; box-shadow: none; }
+  .grid thead th { background: #e6ecf7 !important; color: #000 !important; }
+  .grid tbody td:first-child { background: #f0f0f0 !important; }
+  body { background: #fff; }
+}

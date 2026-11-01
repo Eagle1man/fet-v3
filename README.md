@@ -26,6 +26,8 @@ python -X utf8 run.py validate  # схема + реальный fet-cl (нуже
 python -X utf8 run.py report    # out\final_report.md / .xlsx
 python -X utf8 run.py audit     # docs\00_audit.md
 python -X utf8 run.py ui        # панель: поиск, правка, откат
+python -X utf8 run.py web       # веб-панель для ВМ (FastAPI)
+python -X utf8 run.py export    # выгрузка на сайт вуза (JSON + архив)
 python -X utf8 run.py ask "Что у группы К1А1(9) 26.01.2026?"
 python -X utf8 run.py chat      # диалог: предложение правки и подтверждение
 python -X utf8 run.py all       # всё подряд (без UI)
@@ -48,6 +50,7 @@ python -X utf8 -m pytest
 | `out/final_report.md` / `.xlsx` | сводка и критерии приёмки |
 | `docs/00_audit.md` | аудит входных данных |
 | `data/schedule.db` | нормализованные занятия с происхождением |
+| `out/site/<версия>/` | выгрузка для сайта: JSON, просмотрщик, архив |
 
 ## Структура
 
@@ -65,7 +68,7 @@ src/fetv3/
   journal.py     правки, версии, откат (одна транзакция)
   ui/app.py      панель Tkinter
   cli.py         команды
-tests/           55 тестов
+tests/           89 тестов
 ```
 
 ## Правила сборки
@@ -109,6 +112,23 @@ tests/           55 тестов
 - Правка всегда сначала возвращается как предложение (`confirm=false`);
   применяется только после согласия человека в `run.py chat` или в панели.
 - Ollama недоступен — ассистент сообщает об этом и не отвечает.
+
+## Веб-панель и публикация
+
+`run.py web` поднимает FastAPI-панель для ВМ: поиск, сетка недели, правка,
+конфликты, сборка, проверка FET и публикация. Подробности, Docker и
+требования безопасности — в `docs/03_web.md`.
+
+Экспорт `run.py export` создаёт:
+
+- `groups.json` — формат `do=groups` сайта вуза;
+- `data.json` — все группы и недели (формат `do=schedule`);
+- `index.html` + `assets/` — автономный просмотрщик (можно открыть на любой ВМ);
+- `site_<версия>.zip` — архив для передачи администратору сайта.
+
+API панели повторяет контракт сайта: `/api/site/groups`,
+`/api/site/schedule?group=…`. Сопоставление групп и академий берётся из
+`config/site_groups.json`.
 
 ## Ограничения (это не баги, а состояние данных)
 - Даты в выгрузке — **2026 год**, хотя каталоги названы `*.27`. Год не

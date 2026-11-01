@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Расписание — Южный университет (ИУБиП)</title>
+  <link rel="stylesheet" href="assets/viewer.css">
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="brand">
+      <div class="brand__mark">ИУБиП</div>
+      <div class="brand__text">
+        <h1>Расписание занятий</h1>
+        <p id="scope">Загрузка…</p>
+      </div>
+    </div>
+    <div class="updated">Обновлено: <span id="generated">—</span></div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="controls">
+    <label>Академия
+      <select id="faculty"></select>
+    </label>
+    <label>Группа
+      <select id="group"></select>
+    </label>
+    <label>Неделя
+      <select id="week"></select>
+    </label>
+    <button id="print" type="button">Печать</button>
+    <a class="link" id="link" href="#" target="_blank" rel="noopener">Ссылка на группу</a>
+  </section>
+
+  <section id="empty" class="empty hidden">Выберите группу, чтобы увидеть расписание.</section>
+  <div class="table-wrap">
+    <table id="grid" class="grid"></table>
+  </div>
+  <p class="hint">Если занятие ведётся по подгруппе, рядом стоит метка «п1» или «п2».</p>
+</main>
+
+<footer class="bottom">
+  <div class="wrap">
+    <span id="school">Южный университет (ИУБиП)</span>
+    <span>Данные: AVTOR → FET → публикация</span>
+  </div>
+</footer>
+
+<script src="assets/viewer.js"></script>
+</body>
+</html>

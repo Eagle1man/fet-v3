@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Обзор{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>Обзор</h1>
+  <p class="muted">Расписание из AVTOR, проверка в FET и публикация на сайт.</p>
+</div>
+
+<div class="cards">
+  <div class="stat"><div class="stat__value">{{ lessons }}</div><div class="stat__label">занятий</div></div>
+  <div class="stat"><div class="stat__value">{{ periods|length }}</div><div class="stat__label">периодов</div></div>
+  <div class="stat"><div class="stat__value">{{ teachers }}</div><div class="stat__label">преподавателей</div></div>
+  <div class="stat"><div class="stat__value">{{ rooms }}</div><div class="stat__label">аудиторий</div></div>
+</div>
+
+<div class="grid-2">
+  <section class="card">
+    <h2>Периоды</h2>
+    <table class="table">
+      <thead><tr><th>Период</th><th>Строк</th><th>Даты</th></tr></thead>
+      <tbody>
+      {% for p in periods %}
+        <tr>
+          <td>{{ p.name }}</td>
+          <td>{{ p.rows_total }}</td>
+          <td class="nowrap">{{ p.date_min }} — {{ p.date_max }}</td>
+        </tr>
+      {% else %}
+        <tr><td colspan="3" class="muted">База пуста — выполните ETL.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card">
+    <h2>Последняя сборка</h2>
+    {% if builds %}
+    <table class="table">
+      <thead><tr><th>Файл</th><th>Активностей</th><th>Конфликтов</th><th>Проверка</th></tr></thead>
+      <tbody>
+      {% for b in builds %}
+        <tr>
+          <td>{{ b.name }}</td>
+          <td>{{ b.stats.activities }}</td>
+          <td>{{ b.conflicts|length }}</td>
+          <td>
+            {% set v = validation.get(b.name) %}
+            {% if v %}
+              {% if v.static_ok and not v.fatal and v.run_executed %}
+                <span class="pill pill--ok">OK</span>
+              {% else %}
+                <span class="pill pill--bad">ошибки</span>
+              {% endif %}
+            {% else %}
+              <span class="muted">—</span>
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+      <p class="muted">Сборка ещё не выполнялась.</p>
+    {% endif %}
+    <p><a class="btn" href="/publish">Перейти к сборке и публикации</a></p>
+  </section>
+</div>
+
+<section class="card">
+  <h2>Последние выгрузки на сайт</h2>
+  {% if exports %}
+  <table class="table">
+    <thead><tr><th>Версия</th><th>Когда</th><th>Групп</th><th>Занятий</th><th></th></tr></thead>
+    <tbody>
+    {% for e in exports %}
+      <tr>
+        <td>{{ e.version }}</td>
+        <td>{{ e.generated|replace("T", " ") }}</td>
+        <td>{{ e.stats.groups }}</td>
+        <td>{{ e.stats.lessons }}</td>
+        <td><a href="/download/{{ e.version }}">архив</a></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <p class="muted">Выгрузок ещё нет.</p>
+  {% endif %}
+</section>
+{% endblock %}

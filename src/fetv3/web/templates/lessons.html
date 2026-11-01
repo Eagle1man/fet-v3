@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Занятия{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>Занятия</h1>
+  <p class="muted">Поиск по группе, преподавателю, аудитории и датам. Правка сохраняется в журнал.</p>
+</div>
+
+<form class="filters card" method="get" action="/lessons">
+  <label>Группа
+    <input name="group" value="{{ filters.group }}" list="groups-list" placeholder="К1А1(9)">
+    <datalist id="groups-list">{% for g in groups %}<option value="{{ g }}">{% endfor %}</datalist>
+  </label>
+  <label>Преподаватель
+    <input name="teacher" value="{{ filters.teacher }}" list="teachers-list" placeholder="Фамилия И.О.">
+    <datalist id="teachers-list">{% for t in teachers %}<option value="{{ t }}">{% endfor %}</datalist>
+  </label>
+  <label>Аудитория
+    <input name="room" value="{{ filters.room }}" list="rooms-list" placeholder="201">
+    <datalist id="rooms-list">{% for r in rooms %}<option value="{{ r }}">{% endfor %}</datalist>
+  </label>
+  <label>С
+    <input name="date_from" value="{{ filters.date_from }}" placeholder="ГГГГ-ММ-ДД">
+  </label>
+  <label>По
+    <input name="date_to" value="{{ filters.date_to }}" placeholder="ГГГГ-ММ-ДД">
+  </label>
+  <button type="submit">Найти</button>
+  <a class="btn btn--ghost" href="/lessons">Сбросить</a>
+</form>
+
+{% if selected %}
+<section class="card card--edit">
+  <h2>Правка: {{ selected.groups_raw }} · {{ selected.subject }}</h2>
+  <form class="form form--row" method="post" action="/lessons/edit">
+    <input type="hidden" name="csrf_token" value="{{ csrf }}">
+    <input type="hidden" name="period" value="{{ selected.period }}">
+    <input type="hidden" name="source_row" value="{{ selected.source_row }}">
+    <label>Дата<input name="iso_date" value="{{ selected.iso_date }}" required></label>
+    <label>Пара<input name="pair" type="number" min="1" max="8" value="{{ selected.pair }}" required></label>
+    <label>Аудитория<input name="room" value="{{ selected.room }}"></label>
+    <label>Преподаватель<input name="teacher" value="{{ selected.teacher }}" required></label>
+    <label class="grow">Предмет<input name="subject" value="{{ selected.subject }}" required></label>
+    <label>Кто правит<input name="actor" value="сотрудник"></label>
+    <button type="submit" {% if not is_admin %}disabled{% endif %}>Сохранить</button>
+  </form>
+  <p class="muted">Строка источника: {{ selected.period }}#{{ selected.source_row }}.
+    После правки пересоберите .fet на странице «Публикация».</p>
+</section>
+{% endif %}
+
+<section class="card">
+  <table class="table table--compact">
+    <thead>
+      <tr><th>Дата</th><th>Пара</th><th>Группы</th><th>Предмет</th><th>Вид</th><th>Преподаватель</th><th>Ауд.</th><th>Период</th><th></th></tr>
+    </thead>
+    <tbody>
+    {% for r in rows %}
+      <tr>
+        <td class="nowrap">{{ r.iso_date }}</td>
+        <td>{{ r.pair }}</td>
+        <td>{{ r.groups_raw }}{% if r.subgroup %} <span class="badge">п{{ r.subgroup }}</span>{% endif %}</td>
+        <td>{{ r.subject }}</td>
+        <td>{{ r.subject_type }}</td>
+        <td>{{ r.teacher }}</td>
+        <td>{{ r.room }}</td>
+        <td class="muted">{{ r.period }}</td>
+        <td><a href="/lessons?period={{ r.period|urlencode }}&row={{ r.source_row }}">править</a></td>
+      </tr>
+    {% else %}
+      <tr><td colspan="9" class="muted">Ничего не найдено.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <p class="muted">Показано не больше 300 строк — уточните фильтр.</p>
+</section>
+{% endblock %}

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Конфликты{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>Конфликты исходных данных</h1>
+  <p class="muted">Конфликтные активности не удалены: в .fet у них вес 50 вместо 100.</p>
+</div>
+
+{% if not builds %}
+  <p class="muted">Сборка ещё не выполнялась.</p>
+{% endif %}
+
+{% for b in builds %}
+<section class="card">
+  <div class="card-head">
+    <h2>{{ b.name }}</h2>
+    <span class="muted">активностей: {{ b.stats.activities }}</span>
+  </div>
+  <div class="cards cards--small">
+    <div class="stat"><div class="stat__value">{{ b.conflicts|length }}</div><div class="stat__label">конфликтных слотов</div></div>
+    <div class="stat"><div class="stat__value">{{ b.overloads|length }}</div><div class="stat__label">накладок аудиторий</div></div>
+    <div class="stat"><div class="stat__value">{{ b.revisions|length }}</div><div class="stat__label">версий занятия</div></div>
+    <div class="stat"><div class="stat__value">{{ b.stats.superseded_rows }}</div><div class="stat__label">заменено строк</div></div>
+  </div>
+
+  {% if b.conflicts %}
+  <table class="table table--compact">
+    <thead><tr><th>Вид</th><th>Дата</th><th>Пара</th><th>Кто</th><th>Активности</th></tr></thead>
+    <tbody>
+    {% for c in b.conflicts[:200] %}
+      <tr>
+        <td>{{ c.kind }}</td>
+        <td class="nowrap">{{ c.date }}</td>
+        <td>{{ c.pair }}</td>
+        <td>{{ c.entity }}</td>
+        <td class="small">{{ c.detail }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% if b.conflicts|length > 200 %}<p class="muted">Показаны первые 200 из {{ b.conflicts|length }}.</p>{% endif %}
+  {% endif %}
+
+  {% if b.overloads %}
+  <h3>Накладки аудиторий</h3>
+  <table class="table table--compact">
+    <thead><tr><th>Дата</th><th>Пара</th><th>Аудитория</th><th>Клон</th></tr></thead>
+    <tbody>
+    {% for o in b.overloads %}
+      <tr><td>{{ o.date }}</td><td>{{ o.pair }}</td><td>{{ o.room }}</td><td>{{ o.clone }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+</section>
+{% endfor %}
+{% endblock %}

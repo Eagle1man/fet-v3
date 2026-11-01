@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}Публикация{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>Публикация на сайт</h1>
+  <p class="muted">
+    Экспорт отдаёт JSON в формате действующего API
+    <code>read-file-groups.php</code> и автономный просмотрщик.
+  </p>
+</div>
+
+<section class="card">
+  <div class="card-head"><h2>Действия</h2></div>
+  <div class="actions">
+    <form method="post" action="/jobs/build">
+      <input type="hidden" name="csrf_token" value="{{ csrf }}">
+      <button type="submit" {% if not is_admin %}disabled{% endif %}>Пересобрать .fet</button>
+    </form>
+    <form method="post" action="/jobs/validate">
+      <input type="hidden" name="csrf_token" value="{{ csrf }}">
+      <button type="submit" class="btn--ghost" {% if not is_admin %}disabled{% endif %}>Проверить в FET</button>
+    </form>
+    <form method="post" action="/jobs/export">
+      <input type="hidden" name="csrf_token" value="{{ csrf }}">
+      <button type="submit" {% if not is_admin %}disabled{% endif %}>Выгрузить на сайт</button>
+    </form>
+  </div>
+  <p class="muted">
+    Сборка и проверка запускаются в фоне. Обновите страницу через минуту,
+    чтобы увидеть результат в журнале ниже.
+  </p>
+</section>
+
+<section class="card">
+  <div class="card-head"><h2>Журнал операций</h2></div>
+  {% if jobs %}
+  <table class="table table--compact">
+    <thead><tr><th>Операция</th><th>Статус</th><th>Начало</th><th>Конец</th><th>Результат</th></tr></thead>
+    <tbody>
+    {% for j in jobs %}
+      <tr>
+        <td>{{ j.name }}</td>
+        <td>
+          {% if j.status == 'running' %}<span class="pill pill--warn">выполняется</span>
+          {% elif j.status == 'ok' %}<span class="pill pill--ok">готово</span>
+          {% else %}<span class="pill pill--bad">ошибка</span>{% endif %}
+        </td>
+        <td class="nowrap">{{ j.started }}</td>
+        <td class="nowrap">{{ j.finished or '—' }}</td>
+        <td class="small">{{ j.message }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <p class="muted">Операций пока не было.</p>
+  {% endif %}
+</section>
+
+<section class="card">
+  <div class="card-head">
+    <h2>Выгрузки</h2>
+    {% if latest %}<span class="muted">актуальная: {{ latest }}</span>{% endif %}
+  </div>
+  {% if exports %}
+  <table class="table table--compact">
+    <thead><tr><th>Версия</th><th>Когда</th><th>Период</th><th>Групп</th><th>Занятий</th><th>Архив</th><th>FTP</th></tr></thead>
+    <tbody>
+    {% for e in exports %}
+      <tr>
+        <td>{{ e.version }}</td>
+        <td>{{ e.generated|replace("T", " ") }}</td>
+        <td>{{ e.scope }}</td>
+        <td>{{ e.stats.groups }}</td>
+        <td>{{ e.stats.lessons }}</td>
+        <td><a href="/download/{{ e.version }}">скачать</a></td>
+        <td>
+          {% if ftp_configured and is_admin %}
+          <form method="post" action="/publish/upload" class="inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf }}">
+            <input type="hidden" name="version" value="{{ e.version }}">
+            <button type="submit" class="btn--link">отправить</button>
+          </form>
+          {% else %}<span class="muted">—</span>{% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <p class="muted">Выгрузок ещё нет. Нажмите «Выгрузить на сайт».</p>
+  {% endif %}
+</section>
+
+<section class="card">
+  <h2>Как это стыкуется с сайтом</h2>
+  <ul class="list">
+    <li><code>groups.json</code> — ответ на <code>do=groups</code>.</li>
+    <li><code>data.json</code> — все группы и недели; из него же работает просмотрщик.</li>
+    <li>API панели: <a href="/api/site/groups">/api/site/groups</a> и
+      <a href="/api/site/schedule?group=К1А1(9)">/api/site/schedule?group=…</a>.</li>
+    <li>Архив можно распаковать на ВМ или отдать администратору сайта для размещения.</li>
+  </ul>
+</section>
+{% endblock %}

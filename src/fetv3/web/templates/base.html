@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Расписание{% endblock %} — FET v3</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header class="app-top">
+  <div class="wrap app-top__inner">
+    <a class="app-brand" href="/">
+      <span class="app-brand__mark">ИУБиП</span>
+      <span class="app-brand__text">Расписание<small>AVTOR → FET</small></span>
+    </a>
+    <nav class="app-nav">
+      <a href="/">Обзор</a>
+      <a href="/lessons">Занятия</a>
+      <a href="/week">Неделя</a>
+      <a href="/conflicts">Конфликты</a>
+      <a href="/publish">Публикация</a>
+    </nav>
+    <div class="app-user">
+      {% if auth_required %}
+        {% if is_admin %}
+          <span class="pill pill--ok">администратор</span>
+          <a href="/logout">Выйти</a>
+        {% else %}
+          <a href="/login">Войти</a>
+        {% endif %}
+      {% else %}
+        <span class="pill pill--warn">без пароля</span>
+      {% endif %}
+    </div>
+  </div>
+</header>
+
+<main class="wrap app-main">
+  {% if msg %}
+    <div class="flash">{{ msg }}</div>
+  {% endif %}
+  {% if auth_warning is defined and auth_warning %}
+    <div class="flash flash--warn">
+      Пароль не задан: панель открыта всем. Для ВМ установите
+      <code>FETV3_WEB_PASSWORD</code> в <code>.env</code>.
+    </div>
+  {% endif %}
+  {% block content %}{% endblock %}
+</main>
+
+<footer class="app-bottom">
+  <div class="wrap">
+    <span>{{ school }}</span>
+    <span>Проект расписания. Перед публикацией проверяет человек.</span>
+  </div>
+</footer>
+
+<div id="job-status" class="job-status hidden"></div>
+<script>
+(function () {
+  var box = document.getElementById("job-status");
+  function poll() {
+    fetch("/api/jobs", {cache: "no-store"})
+      .then(function (r) { return r.ok ? r.json() : []; })
+      .then(function (jobs) {
+        var running = jobs.filter(function (j) { return j.status === "running"; });
+        if (!running.length) { box.classList.add("hidden"); return; }
+        var job = running[0];
+        box.classList.remove("hidden");
+        box.textContent = job.name + ": выполняется…";
+        setTimeout(poll, 1500);
+      })
+      .catch(function () {});
+  }
+  poll();
+})();
+</script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

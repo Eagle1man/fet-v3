@@ -1,0 +1,29 @@
+services:
+  fetv3:
+    build: .
+    container_name: fetv3-web
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      FETV3_DB: /data/schedule.db
+      FETV3_OUT: /out
+      AVTOR_OUT: /avtor
+      FETV3_ENV: /nonexistent.env
+    volumes:
+      - ./data:/data
+      - ./out:/out
+      - ./config:/app/config:ro
+      - ./avtor:/avtor:ro
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=3)"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s

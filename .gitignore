@@ -13,3 +13,8 @@ out/
 *.db
 *.db-wal
 *.db-shm
+
+# Сборка пакета
+build/
+*.egg-info/
+dist/

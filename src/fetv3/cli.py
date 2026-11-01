@@ -111,6 +111,28 @@ def command_chat(settings: Settings) -> int:
     return 0
 
 
+def command_export(settings: Settings, scope: str | None) -> int:
+    from . import sitepub
+
+    result = sitepub.export_site(settings, scope)
+    print(
+        f"Выгрузка {result.version}: групп {result.groups}, занятий {result.lessons}, "
+        f"архив {result.zip_path}"
+    )
+    for faculty, count in result.faculties.items():
+        print(f"  {faculty}: {count}")
+    return 0
+
+
+def command_web(settings: Settings, host: str, port: int) -> int:
+    import uvicorn
+
+    from .web.app import create_app
+
+    uvicorn.run(create_app(settings), host=host, port=port, log_level="info")
+    return 0
+
+
 def command_all(settings: Settings) -> int:
     command_etl(settings)
     if command_build(settings, None):
@@ -135,6 +157,11 @@ def main(argv: list[str] | None = None) -> int:
     ask_parser = sub.add_parser("ask", help="Спросить локального ИИ-ассистента")
     ask_parser.add_argument("question", help="Вопрос по расписанию")
     sub.add_parser("chat", help="Диалог с ассистентом (подтверждение правок)")
+    export_parser = sub.add_parser("export", help="Выгрузить расписание для сайта вуза")
+    export_parser.add_argument("--scope", default=None, help="Только один период")
+    web_parser = sub.add_parser("web", help="Веб-панель для ВМ")
+    web_parser.add_argument("--host", default="0.0.0.0")
+    web_parser.add_argument("--port", type=int, default=8000)
     sub.add_parser("all", help="etl + build + validate + report + audit")
 
     args = parser.parse_args(argv)
@@ -156,6 +183,10 @@ def main(argv: list[str] | None = None) -> int:
             return command_ask(settings, args.question)
         if args.command == "chat":
             return command_chat(settings)
+        if args.command == "export":
+            return command_export(settings, args.scope)
+        if args.command == "web":
+            return command_web(settings, args.host, args.port)
         if args.command == "all":
             return command_all(settings)
     except Exception as exc:  # noqa: BLE001 - CLI обязан показать причину
